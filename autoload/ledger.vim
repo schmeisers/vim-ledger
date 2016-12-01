@@ -374,7 +374,8 @@ function! ledger#align_commodity()
     if pos > 0
       call s:goto_col(g:ledger_align_at - pos - 1)
     else
-      call s:goto_col(g:ledger_align_at - strdisplaywidth(rhs) - 2)
+      let rhs = rhs . ".00"
+      call s:goto_col(g:ledger_align_at - strdisplaywidth(rhs) + 2)
     endif
     " Append the part of the line that was previously removed:
     exe 'normal! a' . rhs
