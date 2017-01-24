@@ -499,10 +499,10 @@ function! ledger#autocomplete_and_align()
   return "\<c-x>\<c-o>"
 endf
 
-" Use current line as input to ledger entry and replace with output. If there
+" Use current line as input to ledger print and replace with output. If there
 " are errors, they are echoed instead.
 func! ledger#entry()
-  let l:output = systemlist(s:ledger_cmd(g:ledger_main, join(["entry", getline('.')])))
+  let l:output = systemlist(s:ledger_cmd(g:ledger_main, join(["print -m", getline('.')])))
   " Filter out warnings
   let l:output = filter(l:output, "v:val !~? '^Warning: '")
   " Errors may occur
