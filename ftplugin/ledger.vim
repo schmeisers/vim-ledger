@@ -288,7 +288,7 @@ function! LedgerComplete(findstart, base) "{{{1
         let update_cache = 1
       endif
     elseif b:compl_context == 'new' "{{{2 (new line)
-      return [strftime('%Y/%m/%d')]
+      return ["    "]
     endif "}}}
 
 
