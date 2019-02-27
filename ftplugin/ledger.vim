@@ -10,11 +10,10 @@ endif
 let b:did_ftplugin = 1
 
 let b:undo_ftplugin = "setlocal ".
-                    \ "foldmethod< foldtext< ".
+                    \ "foldtext< ".
                     \ "include< comments< commentstring< omnifunc< formatprg<"
 
 setl foldtext=LedgerFoldText()
-setl foldmethod=syntax
 setl include=^!\\?include
 setl comments=b:;
 setl commentstring=;%s
@@ -39,6 +38,10 @@ endif
 
 if !exists('g:ledger_extra_options')
   let g:ledger_extra_options = ''
+endif
+
+if !exists('g:ledger_date_format')
+  let g:ledger_date_format = '%Y/%m/%d'
 endif
 
 " You can set a maximal number of columns the fold text (excluding amount)

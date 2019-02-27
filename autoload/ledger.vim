@@ -21,7 +21,7 @@ endf
 
 function! ledger#transaction_state_set(lnum, char)
   " modifies or sets the state of the transaction at the cursor,
-  " removing the state alltogether if a:char is empty
+  " removing the state altogether if a:char is empty
   let trans = s:transaction.from_lnum(a:lnum)
   if empty(trans) || has_key(trans, 'expr')
     return
@@ -39,7 +39,7 @@ function! ledger#transaction_date_set(lnum, type, ...) "{{{1
     return
   endif
 
-  let formatted = strftime('%Y/%m/%d', time)
+  let formatted = strftime(g:ledger_date_format, time)
   if has_key(trans, 'date') && ! empty(trans['date'])
     let date = split(trans['date'], '=')
   else
@@ -339,6 +339,15 @@ function! s:goto_col(pos)
   if diff > 0 | exec "normal!" diff . "a " | endif
 endf
 
+" Return substring position (in chars).
+function! s:strpos(expr, pat)
+  let pos = match(a:expr, a:pat)
+  if pos > 0
+    let pos = strchars(a:expr[:pos]) - 1
+  endif
+  return pos
+endf
+
 " Align the amount expression after an account name at the decimal point.
 "
 " This function moves the amount expression of a posting so that the decimal
@@ -368,7 +377,7 @@ function! ledger#align_commodity()
       let pos = matchend(rhs, '\m\d[^[:space:]]*')
     else
       " Find the position of the first decimal separator:
-      let pos = match(rhs, '\V' . g:ledger_decimal_sep)
+      let pos = s:strpos(rhs, '\V' . g:ledger_decimal_sep)
     endif
     " Go to the column that allows us to align the decimal separator at g:ledger_align_at:
     if pos > 0
@@ -387,14 +396,17 @@ function! ledger#align_amount_at_cursor()
   " Select and cut text:
   normal! viWd
   " Find the position of the decimal separator
-  let pos = match(@", g:ledger_decimal_sep) " Returns zero when the separator is the empty string
+  let pos = s:strpos(@", '\V' . g:ledger_decimal_sep) " Returns zero when the separator is the empty string
+  if pos <= 0
+    let pos = len(@")
+  endif
   " Paste text at the correct column and append/prepend default commodity:
   if g:ledger_commodity_before
-    call s:goto_col(g:ledger_align_at - (pos > 0 ? pos : len(@")) - len(g:ledger_default_commodity) - len(g:ledger_commodity_sep) - 1)
+    call s:goto_col(g:ledger_align_at - pos - len(g:ledger_default_commodity) - len(g:ledger_commodity_sep) - 1)
     exe 'normal! a' . g:ledger_default_commodity . g:ledger_commodity_sep
     normal! p
   else
-    call s:goto_col(g:ledger_align_at - (pos > 0 ? pos : len(@")) - 1)
+    call s:goto_col(g:ledger_align_at - pos - 1)
     exe 'normal! pa' . g:ledger_commodity_sep . g:ledger_default_commodity
   endif
 endf!
@@ -447,7 +459,7 @@ function! s:quickfix_toggle(...)
     nnoremap <silent> <buffer> <tab> <c-w><c-w>
     execute 'nnoremap <silent> <buffer> q :' l:list.'close<CR>'
     " Note that the following settings do not persist (e.g., when you close and re-open the quickfix window).
-    " See: http://superuser.com/questions/356912/how-do-i-change-the-quickix-title-status-bar-in-vim
+    " See: https://superuser.com/questions/356912/how-do-i-change-the-quickix-title-status-bar-in-vim
     if g:ledger_qf_hide_file
       setl conceallevel=2
       setl concealcursor=nc
@@ -490,8 +502,12 @@ endf
 function! ledger#autocomplete_and_align()
   if pumvisible()
     return "\<c-n>"
-    " See http://stackoverflow.com/questions/23323747/vim-vimscript-get-exact-character-under-the-cursor
-  elseif matchstr(getline('.'), '\%' . (col('.')-1) . 'c.') =~ '\d'
+  endif
+  " Align an amount only if there is a digit immediately before the cursor and
+  " such digit is preceded by at least one space (the latter condition is
+  " necessary to avoid situations where a date starting at the first column is
+  " confused with a commodity to be aligned).
+  if match(getline('.'), '\s.*\d\%'.col('.').'c') > -1
     norm h
     call ledger#align_amount_at_cursor()
     return "\<c-o>A"

@@ -30,6 +30,10 @@ TIPS                                                             *ledger-tips*
 
 Tips and useful commands
 
+* vim-ledger can do syntax-sensitive folding when you set `foldmethod=syntax`
+  in the |modeline| of your ledger file. This way transactions can shrink down
+  to just one line.
+
 * Try account-completion (as explained below). If you use YouCompleteMe, you
   should disable it for Ledger files. Put this in your .vimrc:
 
@@ -48,6 +52,18 @@ Tips and useful commands
         let g:ledger_extra_options = '--pedantic --explicit --check-payees'
 
   to catch most potential problems in your source file.
+
+* Remap vim paragraph motion to move by transaction.
+
+  In vim, the "{" and "}" keystrokes move the cursor up and down by whole
+  paragraphs. They can be redefined in ledger files to move by transaction
+  instead. Add these lines to .vimrc:
+
+        au FileType ledger noremap { ?^\d<CR>
+        au FileType ledger noremap } /^\d<CR>
+
+  The default definitions already work in ledger files that separate
+  transactions with blank lines.
 
 * `:call ledger#transaction_date_set('.'), "auxiliary")`
 
@@ -261,7 +277,7 @@ behaviour of the ledger filetype.
 
   A value of 0 will disable folding of blank lines, 1 will allow folding of a
   single blank line between transactions; any larger value will enable folding
-  undconditionally.
+  unconditionally.
 
   Note that only lines containing no trailing spaces are considered for
   folding. You can take advantage of this to disable this feature on a
@@ -287,6 +303,10 @@ behaviour of the ledger filetype.
 * String to be put between the commodity and the amount:
 
         let g:ledger_commodity_sep = ''
+
+* Format of transaction date:
+
+        let g:ledger_date_format = '%Y/%m/%d'
 
 * The file to be used to generate reports:
 
@@ -391,7 +411,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
 Public License for more details.
 
 You should have received a copy of the GNU General Public License along
-with this program. If not, see <http://www.gnu.org/licenses/>.
+with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
 vim:ts=8 sw=8 noexpandtab tw=78 ft=help:
