@@ -33,7 +33,7 @@ if ! exists("g:ledger_bin") || empty(g:ledger_bin) || ! executable(g:ledger_bin)
 endif
 
 if exists("g:ledger_bin")
-  exe 'setl formatprg='.substitute(g:ledger_bin, ' ', '\\ ', 'g').'\ -f\ -\ print'
+  exe 'setl formatprg='.substitute(g:ledger_bin, ' ', '\\ ', 'g').'\ -f\ -\ print\ -x'
 endif
 
 if !exists('g:ledger_extra_options')
